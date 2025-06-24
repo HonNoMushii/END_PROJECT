@@ -1,20 +1,22 @@
 from flask import Flask, request, render_template, redirect
-from flask_mail import Mail, Message  # <-- new import
+from flask_mail import Mail, Message
+import os  # <-- important for reading environment variables
 
 app = Flask(__name__)
 
-# Configure email settings - update these with real SMTP details
+# ✅ Secure Gmail SMTP Configuration using environment variables
 app.config.update(
-    MAIL_SERVER='smtp.example.com',     # Replace with a valid SMTP server hostname
+    MAIL_SERVER='smtp.gmail.com',
     MAIL_PORT=587,
     MAIL_USE_TLS=True,
     MAIL_USE_SSL=False,
-    MAIL_USERNAME='your_email@example.com',  # Replace with your email
-    MAIL_PASSWORD='your_password',           # Replace with your password
-    MAIL_DEFAULT_SENDER='your_email@example.com',  # Replace with your email
-    MAIL_DEBUG=True               # added for debugging
+    MAIL_USERNAME=os.environ.get('MAIL_USERNAME'),  # Your Gmail address
+    MAIL_PASSWORD=os.environ.get('MAIL_PASSWORD'),  # Your App Password
+    MAIL_DEFAULT_SENDER=os.environ.get('MAIL_USERNAME'),
+    MAIL_DEBUG=True  # Set to False in production
 )
-mail = Mail(app)  # <-- initialize Flask-Mail
+
+mail = Mail(app)
 
 # Dummy materiaal_data for demonstration
 materiaal_data = {
@@ -27,7 +29,7 @@ materiaal_data = {
 def index():
     resultaat = None
     foutmelding = None
-    onderdeel = request.values.get('onderdeel')  # ondersteunt GET én POST
+    onderdeel = request.values.get('onderdeel')
 
     if request.method == 'POST':
         try:
@@ -57,7 +59,7 @@ def index():
                 'breedte': breedte,
                 'hoogte': hoogte if hoogte else None,
                 'helling': helling,
-                'marge': float(request.form.get('marge', 5)),  # terug als percentage
+                'marge': float(request.form.get('marge', 5)),
                 'oppervlakte': round(lengte * breedte, 2),
                 'aantal': round(base_result, 2),
                 'eenheid': 'm²',
@@ -90,9 +92,7 @@ def contact():
 
 @app.route('/info', methods=['GET'])
 def info():
-    # New info page route
     return render_template('info.html')
 
 if __name__ == '__main__':
     app.run(debug=True)
-
