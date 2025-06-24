@@ -1,0 +1,98 @@
+from flask import Flask, request, render_template, redirect
+from flask_mail import Mail, Message  # <-- new import
+
+app = Flask(__name__)
+
+# Configure email settings - update these with real SMTP details
+app.config.update(
+    MAIL_SERVER='smtp.example.com',     # Replace with a valid SMTP server hostname
+    MAIL_PORT=587,
+    MAIL_USE_TLS=True,
+    MAIL_USE_SSL=False,
+    MAIL_USERNAME='your_email@example.com',  # Replace with your email
+    MAIL_PASSWORD='your_password',           # Replace with your password
+    MAIL_DEFAULT_SENDER='your_email@example.com',  # Replace with your email
+    MAIL_DEBUG=True               # added for debugging
+)
+mail = Mail(app)  # <-- initialize Flask-Mail
+
+# Dummy materiaal_data for demonstration
+materiaal_data = {
+    'hout': 10,
+    'metaal': 20,
+    'kunststof': 5
+}
+
+@app.route('/', methods=['GET', 'POST'])
+def index():
+    resultaat = None
+    foutmelding = None
+    onderdeel = request.values.get('onderdeel')  # ondersteunt GET én POST
+
+    if request.method == 'POST':
+        try:
+            materiaal = request.form.get('materiaal')
+            marge = float(request.form.get('marge', 0)) / 100
+
+            if materiaal not in materiaal_data:
+                foutmelding = "Onbekend materiaal geselecteerd."
+                return render_template('index.html', foutmelding=foutmelding, materialen=materiaal_data)
+
+            try:
+                lengte = float(request.form.get('lengte', '').strip())
+                breedte = float(request.form.get('breedte', '').strip())
+                hoogte_raw = request.form.get('hoogte', '').strip()
+                hoogte = float(hoogte_raw) if hoogte_raw else 0
+                helling_raw = request.form.get('helling', '').strip()
+                helling = float(helling_raw) if helling_raw else None
+            except Exception:
+                foutmelding = "Ongeldige invoer voor lengte, breedte, hoogte of helling."
+                return render_template('index.html', foutmelding=foutmelding, materialen=materiaal_data)
+
+            base_result = lengte * breedte * (1 + marge) * materiaal_data[materiaal]
+            resultaat = {
+                'onderdeel': onderdeel,
+                'materiaal': materiaal,
+                'lengte': lengte,
+                'breedte': breedte,
+                'hoogte': hoogte if hoogte else None,
+                'helling': helling,
+                'marge': float(request.form.get('marge', 5)),  # terug als percentage
+                'oppervlakte': round(lengte * breedte, 2),
+                'aantal': round(base_result, 2),
+                'eenheid': 'm²',
+                'prijs': round(base_result * 1.5, 2)
+            }
+        except Exception as e:
+            foutmelding = str(e)
+    return render_template('index.html', resultaat=resultaat, foutmelding=foutmelding, materialen=materiaal_data)
+
+@app.route('/contact', methods=['GET', 'POST'])
+def contact():
+    success = False
+    error_msg = None
+    if request.method == 'POST':
+        message = request.form.get('message')
+        msg = Message("Nieuw contactbericht", recipients=["stoutengijs@gmail.com"])
+        msg.body = message
+        msg.sender = app.config.get("MAIL_DEFAULT_SENDER")
+        print("Attempting to send email to stoutengijs@gmail.com...")
+        try:
+            mail.send(msg)
+            success = True
+            print("Email sent successfully.")
+        except Exception as e:
+            error_msg = str(e)
+            if "getaddrinfo" in error_msg:
+                error_msg += " | Possible misconfiguration of MAIL_SERVER. Ensure the SMTP hostname is correct and reachable."
+            print("Mail sending failed:", e)
+    return render_template('contact.html', success=success, error_msg=error_msg)
+
+@app.route('/info', methods=['GET'])
+def info():
+    # New info page route
+    return render_template('info.html')
+
+if __name__ == '__main__':
+    app.run(debug=True)
+
