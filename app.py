@@ -4,6 +4,10 @@ import os
 import uuid
 import csv
 from datetime import datetime
+import requests  # new, for reCAPTCHA verification
+import logging  # new, for advanced logging
+
+logging.basicConfig(level=logging.INFO)  # Setup basic logging
 
 app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY", "geheime_sleutel")  # Voor sessies
@@ -17,16 +21,20 @@ app.config.update(
     MAIL_USERNAME=os.environ.get('MAIL_USERNAME'),
     MAIL_PASSWORD=os.environ.get('MAIL_PASSWORD'),
     MAIL_DEFAULT_SENDER=os.environ.get('MAIL_USERNAME'),
-    MAIL_DEBUG=True
+    MAIL_DEBUG=False,  # Disable debug mode for production
 )
 
 mail = Mail(app)
 
-# ✅ Dummy materiaal_data met prijs per m²
+# ✅ Dummy materiaal_data updated for demonstration with additional materials
 materiaal_data = {
     'hout': 10,
     'metaal': 20,
-    'kunststof': 5
+    'kunststof': 5,
+    'beton': 50,
+    'tegel': 15,
+    'glas': 40,
+    'isolatie': 8
 }
 
 @app.route('/', methods=['GET', 'POST'])
@@ -104,36 +112,54 @@ def index():
 
 @app.route('/contact', methods=['GET', 'POST'])
 def contact():
+    """Render contact page and process contact form submissions with reCAPTCHA validation."""
     success = False
     error_msg = None
 
     if request.method == 'POST':
+        # Honeypot spam prevention
         honeypot = request.form.get('honeypot')
         if honeypot:
             error_msg = "Spam detectie: formulier ongeldig ingevuld."
-            return render_template('contact.html', success=success, error_msg=error_msg)
+            return render_template('contact.html', success=success, error_msg=error_msg, recaptcha_site_key=os.environ.get('RECAPTCHA_SITE_KEY'))
+        
+        # reCAPTCHA validation
+        captcha_response = request.form.get('g-recaptcha-response')
+        recaptcha_secret = os.environ.get('RECAPTCHA_SECRET')
+        if not captcha_response or not recaptcha_secret:
+            error_msg = "Captcha validatie mislukt: token of secret ontbreekt."
+            return render_template('contact.html', success=success, error_msg=error_msg, recaptcha_site_key=os.environ.get('RECAPTCHA_SITE_KEY'))
+        captcha_data = {
+            'secret': recaptcha_secret,
+            'response': captcha_response,
+            'remoteip': request.remote_addr
+        }
+        captcha_verify = requests.post("https://www.google.com/recaptcha/api/siteverify", data=captcha_data)
+        if not captcha_verify.json().get('success'):
+            error_msg = "Captcha validatie mislukt. Probeer het opnieuw."
+            return render_template('contact.html', success=success, error_msg=error_msg, recaptcha_site_key=os.environ.get('RECAPTCHA_SITE_KEY'))
 
         email = request.form.get('email')
         message = request.form.get('message')
-
         if not email or not message:
             error_msg = "Zorg ervoor dat zowel e-mailadres als bericht zijn ingevuld."
-            return render_template('contact.html', success=success, error_msg=error_msg)
+            return render_template('contact.html', success=success, error_msg=error_msg, recaptcha_site_key=os.environ.get('RECAPTCHA_SITE_KEY'))
 
         msg = Message("Nieuw contactbericht", recipients=["stoutengijs@gmail.com"])
         msg.body = f"From: {email}\n\n{message}"
         msg.reply_to = email
         msg.sender = app.config.get("MAIL_DEFAULT_SENDER")
-
         try:
             mail.send(msg)
             success = True
+            logging.info("Email sent successfully.")
         except Exception as e:
             error_msg = str(e)
             if "getaddrinfo" in error_msg:
                 error_msg += " | Controleer of MAIL_SERVER correct is ingesteld en bereikbaar is."
+            logging.error("Mail sending failed: %s", e)
 
-    return render_template('contact.html', success=success, error_msg=error_msg)
+    return render_template('contact.html', success=success, error_msg=error_msg, recaptcha_site_key=os.environ.get('RECAPTCHA_SITE_KEY'))
 
 @app.route('/info', methods=['GET'])
 def info():
