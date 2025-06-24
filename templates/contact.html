@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <title>Contact</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>Contact</h1>
+        {% if error_msg %}
+            <div class="fout"><strong>Error:</strong> {{ error_msg }}</div>
+        {% endif %}
+        {% if success %}
+            <p>Bericht verzonden. Bedankt!</p>
+        {% else %}
+            <form method="post">
+                <label for="message">Bericht:</label>
+                <textarea name="message" id="message" rows="8" required></textarea>
+                <button type="submit">Verzend</button>
+            </form>
+        {% endif %}
+    </div>
+    <footer>
+        <p>&copy; 2025 - <a href="{{ url_for('index') }}">Terug naar home</a></p>
+    </footer>
+</body>
+</html>
