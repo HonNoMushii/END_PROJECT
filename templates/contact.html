@@ -4,8 +4,6 @@
     <meta charset="UTF-8">
     <title>Contact</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-    <!-- Added reCAPTCHA script -->
-    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
 </head>
 <body>
     <div class="container">
@@ -17,13 +15,15 @@
             <p>Bericht verzonden. Bedankt!</p>
         {% else %}
             <form method="post">
-                <!-- Added email field -->
                 <label for="email">Email:</label>
                 <input type="email" name="email" required>
+
                 <label for="message">Bericht:</label>
                 <textarea name="message" id="message" rows="8" required></textarea>
-                <!-- Added reCAPTCHA widget -->
-                <div class="g-recaptcha" data-sitekey="{{ recaptcha_site_key }}"></div>
+
+                <!-- Honeypot field (should be hidden via CSS) -->
+                <input type="text" name="honeypot" style="display:none" tabindex="-1" autocomplete="off">
+
                 <button type="submit">Verzend</button>
             </form>
         {% endif %}

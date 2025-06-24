@@ -1,7 +1,6 @@
 from flask import Flask, request, render_template, redirect
 from flask_mail import Mail, Message
 import os  # <-- important for reading environment variables
-import requests  # new import for reCAPTCHA verification
 
 app = Flask(__name__)
 
@@ -74,33 +73,26 @@ def index():
 def contact():
     success = False
     error_msg = None
+
     if request.method == 'POST':
-        # reCAPTCHA validation
-        captcha_response = request.form.get('g-recaptcha-response')
-        recaptcha_secret = os.environ.get('RECAPTCHA_SECRET')
-        if not captcha_response or not recaptcha_secret:
-            error_msg = "Captcha validation failed: missing token or secret."
-            return render_template('contact.html', success=success, error_msg=error_msg)
-        captcha_data = {
-            'secret': recaptcha_secret,
-            'response': captcha_response,
-            'remoteip': request.remote_addr
-        }
-        captcha_verify = requests.post("https://www.google.com/recaptcha/api/siteverify", data=captcha_data)
-        if not captcha_verify.json().get('success'):
-            error_msg = "Captcha validation failed. Please try again."
+        # Optional basic spam prevention: honeypot field (hidden in HTML)
+        honeypot = request.form.get('honeypot')
+        if honeypot:
+            error_msg = "Spam detectie: formulier ongeldig ingevuld."
             return render_template('contact.html', success=success, error_msg=error_msg)
 
-        # Retrieve the email field from the form
         email = request.form.get('email')
         message = request.form.get('message')
-        if not email:
-            error_msg = "Email is required."
+
+        if not email or not message:
+            error_msg = "Zorg ervoor dat zowel e-mailadres als bericht zijn ingevuld."
             return render_template('contact.html', success=success, error_msg=error_msg)
+
         msg = Message("Nieuw contactbericht", recipients=["stoutengijs@gmail.com"])
         msg.body = f"From: {email}\n\n{message}"
         msg.reply_to = email
         msg.sender = app.config.get("MAIL_DEFAULT_SENDER")
+
         print("Attempting to send email to stoutengijs@gmail.com...")
         try:
             mail.send(msg)
@@ -109,8 +101,9 @@ def contact():
         except Exception as e:
             error_msg = str(e)
             if "getaddrinfo" in error_msg:
-                error_msg += " | Possible misconfiguration of MAIL_SERVER. Ensure the SMTP hostname is correct and reachable."
+                error_msg += " | Controleer of MAIL_SERVER correct is ingesteld en bereikbaar is."
             print("Mail sending failed:", e)
+
     return render_template('contact.html', success=success, error_msg=error_msg)
 
 @app.route('/info', methods=['GET'])
