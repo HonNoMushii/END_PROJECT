@@ -1,24 +1,28 @@
-from flask import Flask, request, render_template, redirect
+from flask import Flask, request, render_template, redirect, session
 from flask_mail import Mail, Message
-import os  # <-- important for reading environment variables
+import os
+import uuid
+import csv
+from datetime import datetime
 
 app = Flask(__name__)
+app.secret_key = os.environ.get("SECRET_KEY", "geheime_sleutel")  # Voor sessies
 
-# ✅ Secure Gmail SMTP Configuration using environment variables
+# ✅ Secure Gmail SMTP Configuration
 app.config.update(
     MAIL_SERVER='smtp.gmail.com',
     MAIL_PORT=587,
     MAIL_USE_TLS=True,
     MAIL_USE_SSL=False,
-    MAIL_USERNAME=os.environ.get('MAIL_USERNAME'),  # Your Gmail address
-    MAIL_PASSWORD=os.environ.get('MAIL_PASSWORD'),  # Your App Password
+    MAIL_USERNAME=os.environ.get('MAIL_USERNAME'),
+    MAIL_PASSWORD=os.environ.get('MAIL_PASSWORD'),
     MAIL_DEFAULT_SENDER=os.environ.get('MAIL_USERNAME'),
-    MAIL_DEBUG=True  # Set to False in production
+    MAIL_DEBUG=True
 )
 
 mail = Mail(app)
 
-# Dummy materiaal_data for demonstration
+# ✅ Dummy materiaal_data met prijs per m²
 materiaal_data = {
     'hout': 10,
     'metaal': 20,
@@ -35,16 +39,19 @@ def index():
         try:
             materiaal = request.form.get('materiaal')
             marge = float(request.form.get('marge', 0)) / 100
+            eenheid = request.form.get('eenheid', 'm')
+            conversie = {'mm': 0.001, 'cm': 0.01, 'm': 1.0}
+            factor = conversie.get(eenheid, 1.0)
 
             if materiaal not in materiaal_data:
                 foutmelding = "Onbekend materiaal geselecteerd."
                 return render_template('index.html', foutmelding=foutmelding, materialen=materiaal_data)
 
             try:
-                lengte = float(request.form.get('lengte', '').strip())
-                breedte = float(request.form.get('breedte', '').strip())
+                lengte = float(request.form.get('lengte', '').strip()) * factor
+                breedte = float(request.form.get('breedte', '').strip()) * factor
                 hoogte_raw = request.form.get('hoogte', '').strip()
-                hoogte = float(hoogte_raw) if hoogte_raw else 0
+                hoogte = float(hoogte_raw) * factor if hoogte_raw else 0
                 helling_raw = request.form.get('helling', '').strip()
                 helling = float(helling_raw) if helling_raw else None
             except Exception:
@@ -62,11 +69,37 @@ def index():
                 'marge': float(request.form.get('marge', 5)),
                 'oppervlakte': round(lengte * breedte, 2),
                 'aantal': round(base_result, 2),
-                'eenheid': 'm²',
+                'eenheid': eenheid,
                 'prijs': round(base_result * 1.5, 2)
             }
+
+            # ✅ Sessie logging
+            if 'session_id' not in session:
+                session['session_id'] = str(uuid.uuid4())
+
+            log_dir = "logs"
+            os.makedirs(log_dir, exist_ok=True)
+            log_file = os.path.join(log_dir, f"{session['session_id']}.csv")
+
+            with open(log_file, mode='a', newline='') as file:
+                writer = csv.writer(file)
+                writer.writerow([
+                    datetime.now().isoformat(),
+                    onderdeel,
+                    materiaal,
+                    lengte,
+                    breedte,
+                    hoogte,
+                    helling,
+                    eenheid,
+                    resultaat['oppervlakte'],
+                    resultaat['aantal'],
+                    resultaat['prijs']
+                ])
+
         except Exception as e:
             foutmelding = str(e)
+
     return render_template('index.html', resultaat=resultaat, foutmelding=foutmelding, materialen=materiaal_data)
 
 @app.route('/contact', methods=['GET', 'POST'])
@@ -75,7 +108,6 @@ def contact():
     error_msg = None
 
     if request.method == 'POST':
-        # Optional basic spam prevention: honeypot field (hidden in HTML)
         honeypot = request.form.get('honeypot')
         if honeypot:
             error_msg = "Spam detectie: formulier ongeldig ingevuld."
@@ -93,16 +125,13 @@ def contact():
         msg.reply_to = email
         msg.sender = app.config.get("MAIL_DEFAULT_SENDER")
 
-        print("Attempting to send email to stoutengijs@gmail.com...")
         try:
             mail.send(msg)
             success = True
-            print("Email sent successfully.")
         except Exception as e:
             error_msg = str(e)
             if "getaddrinfo" in error_msg:
                 error_msg += " | Controleer of MAIL_SERVER correct is ingesteld en bereikbaar is."
-            print("Mail sending failed:", e)
 
     return render_template('contact.html', success=success, error_msg=error_msg)
 

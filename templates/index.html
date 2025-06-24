@@ -40,18 +40,24 @@
         </form>
 
         <!-- FORM 2: POST voor berekening -->
-        <form method="post" id="materiaalForm">
-            <!-- Verborgen veld voor gekozen onderdeel -->
+        <form method="post" id="materiaalForm" onsubmit="toggleVelden()">
             <input type="hidden" name="onderdeel" value="{{ request.args.get('onderdeel') or (resultaat.onderdeel if resultaat else '') }}">
 
-            <label for="lengte">Lengte (m)</label>
+            <label for="eenheid">Eenheid</label>
+            <select name="eenheid" required>
+                <option value="m" {% if resultaat and resultaat.eenheid == 'm' %}selected{% endif %}>meter (m)</option>
+                <option value="cm" {% if resultaat and resultaat.eenheid == 'cm' %}selected{% endif %}>centimeter (cm)</option>
+                <option value="mm" {% if resultaat and resultaat.eenheid == 'mm' %}selected{% endif %}>millimeter (mm)</option>
+            </select>
+
+            <label for="lengte">Lengte</label>
             <input type="number" name="lengte" step="0.01" value="{{ resultaat.lengte if resultaat else '' }}" required>
 
-            <label for="breedte">Breedte (m)</label>
+            <label for="breedte">Breedte</label>
             <input type="number" name="breedte" step="0.01" value="{{ resultaat.breedte if resultaat else '' }}" required>
 
             <div id="hoogteveld" style="display: none;">
-                <label for="hoogte">Hoogte / Dikte (m)</label>
+                <label for="hoogte">Hoogte / Dikte</label>
                 <input type="number" name="hoogte" step="0.01" value="{{ resultaat.hoogte if resultaat and resultaat.hoogte is not none else '' }}">
             </div>
 
@@ -97,6 +103,7 @@
             </div>
         {% endif %}
     </div>
+
     <footer>
         <p>&copy; 2025 - <a href="{{ url_for('contact') }}">Contact</a></p>
     </footer>
