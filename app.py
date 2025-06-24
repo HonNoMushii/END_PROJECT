@@ -1,6 +1,7 @@
 from flask import Flask, request, render_template, redirect
 from flask_mail import Mail, Message
 import os  # <-- important for reading environment variables
+import requests  # new import for reCAPTCHA verification
 
 app = Flask(__name__)
 
@@ -74,6 +75,22 @@ def contact():
     success = False
     error_msg = None
     if request.method == 'POST':
+        # reCAPTCHA validation
+        captcha_response = request.form.get('g-recaptcha-response')
+        recaptcha_secret = os.environ.get('RECAPTCHA_SECRET')
+        if not captcha_response or not recaptcha_secret:
+            error_msg = "Captcha validation failed: missing token or secret."
+            return render_template('contact.html', success=success, error_msg=error_msg)
+        captcha_data = {
+            'secret': recaptcha_secret,
+            'response': captcha_response,
+            'remoteip': request.remote_addr
+        }
+        captcha_verify = requests.post("https://www.google.com/recaptcha/api/siteverify", data=captcha_data)
+        if not captcha_verify.json().get('success'):
+            error_msg = "Captcha validation failed. Please try again."
+            return render_template('contact.html', success=success, error_msg=error_msg)
+
         # Retrieve the email field from the form
         email = request.form.get('email')
         message = request.form.get('message')
