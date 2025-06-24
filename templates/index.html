@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <title>🏗️ Materiaalcalculator</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="https://fonts.googleapis.com/css?family=Roboto:300,400,700" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <script>
+        function toggleVelden() {
+            const onderdeel = document.querySelector('select[name="onderdeel"]').value;
+            const hellingveld = document.getElementById('hellingveld');
+            const hoogteveld = document.getElementById('hoogteveld');
+            const volumeOnderdelen = ['grondwerk', 'tuin', 'perceel', 'opvulling', 'zandbed', 'tuinaarde'];
+
+            hellingveld.style.display = onderdeel === 'dak' ? 'block' : 'none';
+            hoogteveld.style.display = volumeOnderdelen.includes(onderdeel) ? 'block' : 'none';
+        }
+
+        window.addEventListener('DOMContentLoaded', toggleVelden);
+    </script>
+</head>
+<body>
+    <div class="container">
+        <h1>🏗️ Materiaalcalculator</h1>
+
+        {% if foutmelding %}
+            <div class="fout"><strong>Fout:</strong> {{ foutmelding }}</div>
+        {% endif %}
+
+        <!-- FORM 1: GET voor onderdeel-selectie -->
+        <form method="get" id="onderdeelForm">
+            <label for="onderdeel">Onderdeel</label>
+            <select name="onderdeel" onchange="document.getElementById('onderdeelForm').submit()" required>
+                {% set onderdelen = ['vloer', 'gevel', 'dak', 'raam', 'isolatie', 'afwerking', 'grondwerk', 'tuin', 'perceel', 'opvulling', 'zandbed', 'tuinaarde'] %}
+                {% for o in onderdelen %}
+                    <option value="{{ o }}" {% if request.args.get('onderdeel') == o or (resultaat and resultaat.onderdeel == o) %}selected{% endif %}>{{ o|capitalize }}</option>
+                {% endfor %}
+            </select>
+        </form>
+
+        <!-- FORM 2: POST voor berekening -->
+        <form method="post" id="materiaalForm">
+            <!-- Verborgen veld voor gekozen onderdeel -->
+            <input type="hidden" name="onderdeel" value="{{ request.args.get('onderdeel') or (resultaat.onderdeel if resultaat else '') }}">
+
+            <label for="lengte">Lengte (m)</label>
+            <input type="number" name="lengte" step="0.01" value="{{ resultaat.lengte if resultaat else '' }}" required>
+
+            <label for="breedte">Breedte (m)</label>
+            <input type="number" name="breedte" step="0.01" value="{{ resultaat.breedte if resultaat else '' }}" required>
+
+            <div id="hoogteveld" style="display: none;">
+                <label for="hoogte">Hoogte / Dikte (m)</label>
+                <input type="number" name="hoogte" step="0.01" value="{{ resultaat.hoogte if resultaat and resultaat.hoogte is not none else '' }}">
+            </div>
+
+            <div id="hellingveld" style="display: none;">
+                <label for="helling">Hellingshoek (°)</label>
+                <input type="number" name="helling" step="0.1" min="0" max="89" value="{{ resultaat.helling if resultaat and resultaat.helling is not none else '' }}">
+            </div>
+
+            <label for="materiaal">Materiaal</label>
+            <select name="materiaal" required>
+                {% for key in materialen %}
+                    <option value="{{ key }}" {% if resultaat and resultaat.materiaal == key %}selected{% endif %}>{{ key }}</option>
+                {% endfor %}
+            </select>
+
+            <label for="marge">Snijverlies / speling (%)</label>
+            <input type="number" name="marge" step="1" value="{{ resultaat.marge if resultaat else 5 }}">
+
+            <button type="submit">Bereken</button>
+        </form>
+
+        {% if resultaat %}
+            <div class="resultaat">
+                <h2>Resultaat</h2>
+                <p><strong>Onderdeel:</strong> {{ resultaat.onderdeel|capitalize }}</p>
+                <p><strong>Materiaal:</strong> {{ resultaat.materiaal }}</p>
+                <p><strong>Lengte:</strong> {{ resultaat.lengte }} m</p>
+                <p><strong>Breedte:</strong> {{ resultaat.breedte }} m</p>
+                {% if resultaat.hoogte %}
+                    <p><strong>Hoogte:</strong> {{ resultaat.hoogte }} m</p>
+                {% endif %}
+                {% if resultaat.helling %}
+                    <p><strong>Hellingshoek:</strong> {{ resultaat.helling }}°</p>
+                {% endif %}
+                {% if resultaat.oppervlakte %}
+                    <p><strong>Oppervlakte:</strong> {{ resultaat.oppervlakte }} m²</p>
+                {% endif %}
+                {% if resultaat.volume %}
+                    <p><strong>Volume:</strong> {{ resultaat.volume }} m³</p>
+                {% endif %}
+                <p><strong>Benodigd (incl. {{ resultaat.marge }}% marge):</strong> {{ resultaat.aantal }} {{ resultaat.eenheid }}</p>
+                <p><strong>Richtprijs:</strong> €{{ resultaat.prijs }}</p>
+            </div>
+        {% endif %}
+    </div>
+    <footer>
+        <p>&copy; 2025 - <a href="{{ url_for('contact') }}">Contact</a></p>
+    </footer>
+</body>
+</html>
