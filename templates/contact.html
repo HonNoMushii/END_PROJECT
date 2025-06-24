@@ -15,6 +15,9 @@
             <p>Bericht verzonden. Bedankt!</p>
         {% else %}
             <form method="post">
+                <!-- Added email field -->
+                <label for="email">Email:</label>
+                <input type="email" name="email" required>
                 <label for="message">Bericht:</label>
                 <textarea name="message" id="message" rows="8" required></textarea>
                 <button type="submit">Verzend</button>

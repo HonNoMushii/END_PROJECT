@@ -74,9 +74,15 @@ def contact():
     success = False
     error_msg = None
     if request.method == 'POST':
+        # Retrieve the email field from the form
+        email = request.form.get('email')
         message = request.form.get('message')
+        if not email:
+            error_msg = "Email is required."
+            return render_template('contact.html', success=success, error_msg=error_msg)
         msg = Message("Nieuw contactbericht", recipients=["stoutengijs@gmail.com"])
-        msg.body = message
+        msg.body = f"From: {email}\n\n{message}"
+        msg.reply_to = email
         msg.sender = app.config.get("MAIL_DEFAULT_SENDER")
         print("Attempting to send email to stoutengijs@gmail.com...")
         try:
