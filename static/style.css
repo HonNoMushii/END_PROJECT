@@ -5,26 +5,31 @@ body {
     padding: 0;
     color: #333;
 }
+
 .container {
     max-width: 900px;
-    margin: 30px auto 80px auto;  /* added bottom margin to avoid footer overlap */
+    margin: 30px auto 80px auto; 
     padding: 20px;
     background: #fff;
     box-shadow: 0 2px 8px rgba(0,0,0,0.1);
     border-radius: 5px;
 }
+
 h1, h2 {
     text-align: center;
     color: #2c3e50;
 }
+
 form {
     margin: 20px auto;
     display: grid;
     gap: 15px;
 }
+
 label {
     font-weight: 500;
 }
+
 input, select {
     padding: 8px;
     border: 1px solid #ccc;
@@ -33,10 +38,12 @@ input, select {
     box-sizing: border-box;
     transition: border-color 0.3s, box-shadow 0.3s;
 }
+
 input:focus, select:focus {
     border-color: #2c3e50;
     box-shadow: 0 0 5px rgba(44, 62, 80, 0.5);
 }
+
 button {
     background: #2c3e50;
     color: #fff;
@@ -46,9 +53,11 @@ button {
     cursor: pointer;
     transition: background 0.3s ease;
 }
+
 button:hover {
     background: #1a252f;
 }
+
 div.fout {
     background: #e74c3c;
     color: #fff;
@@ -56,25 +65,29 @@ div.fout {
     border-radius: 3px;
     text-align: center;
 }
+
 .resultaat {
     margin-top: 20px;
     padding: 15px;
     background: #ecf0f1;
     border-radius: 5px;
 }
+
 .resultaat p {
     margin: 8px 0;
 }
+
 @media (max-width:600px) {
     .container {
         padding: 15px;
         margin: 20px;
     }
+
     input, select, button {
         font-size: 16px;
     }
 }
-/* New footer styling */
+
 footer {
     position: fixed;
     bottom: 0;
@@ -86,7 +99,30 @@ footer {
     padding: 10px;
     font-size: 14px;
 }
+
 footer a {
     color: #fff;
     text-decoration: underline;
+}
+
+a.button, .button {
+    display: inline-block;
+    padding: 8px 16px;
+    background-color: #eee;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    color: #333;
+    text-decoration: none;
+    font-weight: 500;
+    transition: background-color 0.2s ease;
+}
+
+a.button:hover {
+    background-color: #ddd;
+}
+
+.button.secondary {
+    background-color: #f4f4f4;
+    border-color: #bbb;
+    color: #444;
 }

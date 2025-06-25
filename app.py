@@ -22,10 +22,10 @@ app.config.update(
     MAIL_PORT=587,
     MAIL_USE_TLS=True,
     MAIL_USE_SSL=False,
-    MAIL_USERNAME=os.environ.get('MAIL_USERNAME'),
-    MAIL_PASSWORD=os.environ.get('MAIL_PASSWORD'),
-    MAIL_DEFAULT_SENDER=os.environ.get('MAIL_USERNAME'),
-    MAIL_DEBUG=False,
+    MAIL_USERNAME=os.environ.get('MAIL_USERNAME'),  # smtp username, added in environment variables render.com  
+    MAIL_PASSWORD=os.environ.get('MAIL_PASSWORD'),  # smtp password, added in environment variables render.com
+    MAIL_DEFAULT_SENDER=os.environ.get('MAIL_USERNAME'),  # Default sender email = smtp email
+    MAIL_DEBUG=False, # False in production, True for debugging
 )
 
 mail = Mail(app)
@@ -139,7 +139,6 @@ materiaal_data = {
     'kantopsluiting beton': 12
 }
 
-
 # In-memory statistiek
 app.config["materiaal_stats"] = defaultdict(int)
 
@@ -187,9 +186,11 @@ def index():
                 'prijs': round(base_result * 1.5, 2)
             }
 
+            # Sessie ID genereren als deze nog niet bestaat
             if 'session_id' not in session:
                 session['session_id'] = str(uuid.uuid4())
 
+            # Logbestanden aanmaken
             log_dir = "logs"
             os.makedirs(log_dir, exist_ok=True)
             datum = datetime.now().strftime('%Y%m%d')
