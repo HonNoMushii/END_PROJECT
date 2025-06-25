@@ -7,12 +7,47 @@
 </head>
 <body>
     <div class="container">
-        <h1>Info Pagina</h1>
-        <p>Welkom op de Info pagina. Hier vind je extra informatie.</p>
-        <p><a href="{{ url_for('index') }}">Terug naar home</a></p>
+        <h1>Informatie over de materiaalcalculator</h1>
+
+        <p>Welkom bij de informatiepagina van de <strong>materiaalcalculator</strong>. Deze tool is bedoeld om snel en eenvoudig de benodigde hoeveelheid materiaal én de bijbehorende richtprijs te berekenen voor diverse bouwonderdelen.</p>
+
+        <h2></h2>Hoe werkt het?</h2>
+        <ul>
+            <li>Selecteer het gewenste <strong>onderdeel</strong> van het project (zoals vloer, gevel, dak...)</li>
+            <li>Voer de <strong>afmetingen</strong> in (lengte en breedte; optioneel hoogte of helling)</li>
+            <li>Kies het gewenste <strong>materiaal</strong> uit een uitgebreide lijst</li>
+            <li>Voeg een marge toe voor snijverlies of speling (in %)</li>
+            <li>Klik op <em>Bereken</em> om de hoeveelheid en richtprijs te tonen</li>
+        </ul>
+
+        <h2>Materialenlijst</h2>
+        <p>De materialenlijst bevat ruim 80 veelgebruikte bouwmaterialen, gesorteerd op categorie zoals:</p>
+        <ul>
+            <li>Ruwbouw (beton, baksteen, kalkzandsteen...)</li>
+            <li>Isolatie (dakisolatie, PIR, minerale wol...)</li>
+            <li>Afwerking (parket, verf, tegels...)</li>
+            <li>Tuin en buitenruimte (graszoden, klinkers...)</li>
+            <li>Techniek & duurzaamheid (leidingen, zonnepanelen, warmtepomp...)</li>
+        </ul>
+        <p>Alle prijzen zijn gebaseerd op een <strong>richtprijs per vierkante meter</strong> (m²), tenzij anders aangegeven. Deze kunnen per project of leverancier variëren.</p>
+
+        <h2>Aandachtspunten</h2>
+        <ul>
+            <li>De berekeningen zijn schattingen en geen vervanging voor een professionele offerte</li>
+            <li>Bij materialen die per stuk of volume worden gerekend (zoals een warmtepomp), wordt vooralsnog een benadering per m² gehanteerd</li>
+            <li>Invoer gebeurt in meters, met automatische omzetting van cm of mm indien gekozen</li>
+        </ul>
+
+        <p>Heb je vragen of suggesties? Neem gerust <a href="{{ url_for('contact') }}">contact</a> op.</p>
+
+        <p><a href="{{ url_for('index') }}">⬅ Terug naar de calculator</a></p>
     </div>
+
     <footer>
-        <p>&copy; 2025 - <a href="{{ url_for('contact') }}">Contact</a></p>
+        <p>&copy; 2025 - 
+            <a href="{{ url_for('contact') }}">Contact</a>  
+            <a href="{{ url_for('index') }}">Home</a>
+        </p>
     </footer>
 </body>
 </html>

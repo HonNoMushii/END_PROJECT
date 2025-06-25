@@ -2,7 +2,7 @@
 <html lang="nl">
 <head>
     <meta charset="UTF-8">
-    <title>🏗️ Materiaalcalculator</title>
+    <title>Materiaalcalculator</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link href="https://fonts.googleapis.com/css?family=Roboto:300,400,700" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
@@ -22,13 +22,13 @@
 </head>
 <body>
     <div class="container">
-        <h1>🏗️ Materiaalcalculator</h1>
+        <h1> Materiaalcalculator</h1>
 
         {% if foutmelding %}
             <div class="fout"><strong>Fout:</strong> {{ foutmelding }}</div>
         {% endif %}
 
-        <!-- FORM 1: GET voor onderdeel-selectie -->
+        <!-- FORM 1: GET onderdeel-selectie -->
         <form method="get" id="onderdeelForm">
             <label for="onderdeel">Onderdeel</label>
             <select name="onderdeel" onchange="document.getElementById('onderdeelForm').submit()" required>
@@ -39,7 +39,7 @@
             </select>
         </form>
 
-        <!-- FORM 2: POST voor berekening -->
+        <!-- FORM 2: POST berekening -->
         <form method="post" id="materiaalForm" onsubmit="toggleVelden()">
             <input type="hidden" name="onderdeel" value="{{ request.args.get('onderdeel') or (resultaat.onderdeel if resultaat else '') }}">
 

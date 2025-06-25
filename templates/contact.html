@@ -21,7 +21,6 @@
                 <label for="message">Bericht:</label>
                 <textarea name="message" id="message" rows="8" required></textarea>
 
-                <!-- Honeypot field (should be hidden via CSS) -->
                 <input type="text" name="honeypot" style="display:none" tabindex="-1" autocomplete="off">
 
                 <button type="submit">Verzend</button>
@@ -29,7 +28,7 @@
         {% endif %}
     </div>
     <footer>
-        <p>&copy; 2025 - <a href="{{ url_for('index') }}">Terug naar home</a></p>
+        <p>&copy; 2025 - <a href="{{ url_for('index') }}">home</a></p>
     </footer>
 </body>
 </html>
