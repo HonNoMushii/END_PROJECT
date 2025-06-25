@@ -262,6 +262,23 @@ def contact():
 def info():
     return render_template('info.html')
 
+@app.route('/mijn-berekeningen')
+def mijn_berekeningen():
+    if 'session_id' not in session:
+        return "Geen actieve sessie."
+
+    datum = datetime.now().strftime('%Y%m%d')
+    log_json = os.path.join('logs', f"{session['session_id']}_{datum}.jsonl")
+
+    resultaten = []
+    if os.path.exists(log_json):
+        with open(log_json) as f:
+            for line in f:
+                resultaten.append(json.loads(line))
+
+    return render_template('mijn_berekeningen.html', resultaten=resultaten)
+
+
 # Custom error handlers
 @app.errorhandler(404)
 def page_not_found(e):
