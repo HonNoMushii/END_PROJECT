@@ -278,7 +278,6 @@ def mijn_berekeningen():
 
     return render_template('mijn_berekeningen.html', resultaten=resultaten)
 
-
 # Custom error handlers
 @app.errorhandler(404)
 def page_not_found(e):
