@@ -22,3 +22,52 @@
 # virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
 hs_err_pid*
 replay_pid*
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.so
+*.egg
+*.egg-info/
+dist/
+build/
+.eggs/
+pip-wheel-metadata/
+*.sqlite3
+
+# Flask/instance/config
+instance/
+.env
+.env.*
+*.db
+*.sqlite
+*.sqlite3
+
+# VSCode
+.vscode/
+
+# MacOS
+.DS_Store
+
+# Logs
+logs/
+*.log
+
+# Test/coverage
+.coverage
+htmlcov/
+.tox/
+.pytest_cache/
+.cache/
+.noseids
+
+# Gunicorn
+gunicorn.log
+
+# Heroku/Render
+*.pid
+
+# Jupyter
+.ipynb_checkpoints/
