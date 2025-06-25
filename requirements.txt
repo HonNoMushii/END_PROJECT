@@ -2,3 +2,6 @@ Flask>=2.1
 Flask-Mail>=0.9.1
 gunicorn
 requests
+black
+isort
+safety
