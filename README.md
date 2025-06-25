@@ -34,7 +34,7 @@ Een gebruiksvriendelijke webapplicatie om snel de benodigde hoeveelheid materiaa
 
 ## Gebruik
 
-- Ga naar https://end-project-8pek.onrender.com/.
+- Ga naar https://end-project-8pek.onrender.com/  -> https://youtu.be/-rAHW5zxgag (uitleg video)
 - Vul de velden in en klik op **Bereken**.
 - Bekijk je berekeningen via "Mijn Berekeningen".
 - Neem contact op via het contactformulier.
